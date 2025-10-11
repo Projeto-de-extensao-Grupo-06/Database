@@ -89,7 +89,8 @@ CREATE TABLE IF NOT EXISTS parameter_option (
     type VARCHAR(45) NOT NULL,
     addition_tax DOUBLE DEFAULT 0.0,
     fixed_cost DOUBLE DEFAULT 0.0,
-    fk_service INT 
+    fk_parameter INT,
+    FOREIGN KEY (fk_service) REFERENCES budget_parameter(id_parameter)
 );
 
 CREATE TABLE IF NOT EXISTS budget_parameter (
@@ -99,8 +100,7 @@ CREATE TABLE IF NOT EXISTS budget_parameter (
     description VARCHAR(45),
     metric VARCHAR(45),
     is_pre_budget TINYINT DEFAULT 0,
-    fixed_value DOUBLE,
-    FOREIGN KEY (fk_budget) REFERENCES budget(id_budget)
+    fixed_value DOUBLE
 );
 
 CREATE TABLE IF NOT EXISTS parameter_cost (
@@ -108,8 +108,7 @@ CREATE TABLE IF NOT EXISTS parameter_cost (
     fk_option INT NOT NULL,
     cost DOUBLE NOT NULL,
     PRIMARY KEY (fk_parameter, fk_option),
-    FOREIGN KEY (fk_parameter) REFERENCES budget_parameter(id_parameter),
-    FOREIGN KEY (fk_option) REFERENCES parameter_option(id_service_option)
+    FOREIGN KEY (fk_parameter) REFERENCES budget_parameter(id_parameter)
 );
 
 #--- PROJECT ---
@@ -123,6 +122,7 @@ CREATE TABLE IF NOT EXISTS project (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     system_type ENUM('on-grid', 'off-grid') NOT NULL,
     deadline DATETIME,
+    system_type ENUM('site', 'bot') NOT NULL,
     name VARCHAR(45) NOT NULL,
     description VARCHAR(100),
     FOREIGN KEY (fk_client) REFERENCES client(id_client),
