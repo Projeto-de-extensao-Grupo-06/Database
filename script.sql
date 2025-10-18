@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS material_url (
 CREATE TABLE IF NOT EXISTS permission_group (
     id_permission_group INT AUTO_INCREMENT PRIMARY KEY,
     role VARCHAR(45) NOT NULL,
-    main_screen VARCHAR(45),
+    main_module VARCHAR(45),
     access_client TINYINT,
     access_project TINYINT,
     access_budget TINYINT,

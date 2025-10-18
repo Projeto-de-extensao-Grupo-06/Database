@@ -1,7 +1,7 @@
-INSERT INTO permission_group (role, main_screen, access_client, access_project, access_budget, access_schedule) VALUES
-('admin', 'dashboard', 15, 15, 15, 15),
+INSERT INTO permission_group (role, main_module, access_client, access_project, access_budget, access_schedule) VALUES
+('admin', 'clients', 15, 15, 15, 15),
 ('technical', 'schedule', 1, 7, 15, 7),
-('engineer', 'project_list', 1, 1, 1, 1);
+('engineer', 'projects', 1, 1, 1, 1);
 
 INSERT INTO coworker (password, first_name, last_name, fk_permission, phone, email) VALUES
 ('$2a$12$Vo6eqzPrUo/lvyD7j7SA5OnX3vHNiXUom2xasN27LBDqK.eZOrTku', 'Sálvio', 'Nobrega', 1, '11987654321', 'salvio.admin@solarize.com.br'),
