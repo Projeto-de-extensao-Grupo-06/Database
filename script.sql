@@ -168,7 +168,7 @@ CREATE TABLE IF NOT EXISTS schedule (
     date DATETIME NOT NULL,
     is_active TINYINT DEFAULT 1,
     fk_project INT NOT NULL,
-    type ENUM('visit', 'note') NOT NULL,
+    type ENUM('visit', 'install', 'note') NOT NULL,
     fk_coworker INT NOT NULL,
     status ENUM('marked', 'in_progress', 'finished') NOT NULL DEFAULT 'marked',
     title VARCHAR(45) NOT NULL,
