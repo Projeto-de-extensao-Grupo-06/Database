@@ -120,3 +120,123 @@ WHERE
     p.is_active = 1 AND p.status IN ('PRE_BUDGET', 'FINAL_BUDGET', 'INSTALLED', 'COMPLETED')
 GROUP BY
     etapa;
+
+
+--=====================================
+-- SELEÇÕES DAS VIEWS
+--=====================================
+
+SELECT
+    (
+        SELECT SUM(profit_margin)
+        FROM VIEW_ANALYSIS_PROJECT_FINANCE
+        WHERE created_at >= '2025-10-01 00:00:00' AND created_at < '2025-12-01 00:00:00'
+    ) AS total_profit_margin,
+    (
+        SELECT acquisition_channel
+        FROM VIEW_ANALYSIS_PROJECT_FINANCE
+        WHERE created_at >= '2025-10-01 00:00:00' AND created_at < '2025-12-01 00:00:00'
+        GROUP BY acquisition_channel
+        ORDER BY SUM(total_project_cost) DESC
+        LIMIT 1
+    ) AS most_costly_channel,
+    (
+        SELECT
+            (SUM(CASE WHEN status = 'COMPLETED' THEN 1 ELSE 0 END) * 100.0 / COUNT(id_project))
+        FROM VIEW_ANALYSIS_PROJECT_FINANCE
+        WHERE created_at >= '2025-10-01 00:00:00' AND created_at < '2025-12-01 00:00:00'
+    ) AS project_completion_rate,
+    (
+        SELECT
+            (SUM(CASE WHEN status IN ('FINAL_BUDGET', 'INSTALLED', 'COMPLETED') THEN 1 ELSE 0 END) * 100.0 /
+             SUM(CASE WHEN status = 'NEW' THEN 1 ELSE 0 END))
+        FROM VIEW_ANALYSIS_PROJECT_FINANCE
+        WHERE created_at >= '2025-10-01 00:00:00' AND created_at < '2025-12-01 00:00:00'
+    ) AS funnel_conversion_rate;
+
+
+SELECT
+    CASE FD.acquisition_channel
+        WHEN 'SITE_BUDGET_FORM' THEN 'Site'
+        WHEN 'INTERNAL_MANUAL_ENTRY' THEN 'Boca a Boca'
+        WHEN 'WHATSAPP_BOT' THEN 'Rede Social'
+        ELSE FD.acquisition_channel
+        END AS nome,
+    (
+        COUNT(FD.id_project) * 100.0 / (
+            SELECT COUNT(id_project)
+            FROM VIEW_ANALYSIS_PROJECT_FINANCE
+            WHERE created_at >= '2025-10-01 00:00:00' AND created_at < '2025-12-01 00:00:00'
+        )
+        ) AS percentual
+FROM
+    VIEW_ANALYSIS_PROJECT_FINANCE FD
+WHERE
+    FD.created_at >= '2025-10-01 00:00:00' AND FD.created_at < '2025-12-01 00:00:00'
+GROUP BY
+    FD.acquisition_channel
+ORDER BY
+    percentual DESC;
+
+
+SELECT
+    ano,
+    mes,
+    total_cost,
+    total_profit
+FROM
+    VIEW_ANALYSIS_PROFIT_COST_MONTHLY
+WHERE
+    STR_TO_DATE(CONCAT(ano, '-', mes, '-01'), '%Y-%m-%d') >= '2025-10-01'
+  AND STR_TO_DATE(CONCAT(ano, '-', mes, '-01'), '%Y-%m-%d') < '2025-12-01'
+ORDER BY
+    ano ASC, mes ASC;
+
+
+SELECT
+    CASE p.status
+        WHEN 'COMPLETED' THEN 'Finalizado'
+        WHEN 'NEGOTIATION_FAILED' THEN 'Finalizado'
+        WHEN 'SCHEDULED_TECHNICAL_VISIT' THEN 'Agendado'
+        WHEN 'SCHEDULED_INSTALLING_VISIT' THEN 'Agendado'
+        WHEN 'NEW' THEN 'Novo'
+        ELSE 'Em andamento'
+        END AS status_group,
+
+    COUNT(p.id_project) AS quantidade
+FROM
+    project p
+WHERE
+    p.is_active = 1
+  AND p.created_at >= '2025-10-01 00:00:00'
+  AND p.created_at < '2025-12-01 00:00:00'
+GROUP BY
+    CASE p.status
+        WHEN 'COMPLETED' THEN 'Finalizado'
+        WHEN 'NEGOTIATION_FAILED' THEN 'Finalizado'
+        WHEN 'SCHEDULED_TECHNICAL_VISIT' THEN 'Agendado'
+        WHEN 'SCHEDULED_INSTALLING_VISIT' THEN 'Agendado'
+        WHEN 'NEW' THEN 'Novo'
+        ELSE 'Em andamento'
+        END;
+
+
+SELECT
+    CASE p.status
+        WHEN 'PRE_BUDGET' THEN 'Pré-Orçamento'
+        WHEN 'FINAL_BUDGET' THEN 'Contrato Assinado'
+        WHEN 'INSTALLED' THEN 'Instalado'
+        WHEN 'COMPLETED' THEN 'Finalizado/Entregue'
+        ELSE 'Outras Etapas'
+        END AS etapa,
+    COUNT(p.id_project) AS valor
+FROM
+    project p
+WHERE
+    p.is_active = 1
+  AND p.created_at >= '2025-10-01 00:00:00' AND p.created_at < '2025-12-01 00:00:00'
+  AND p.status IN ('PRE_BUDGET', 'FINAL_BUDGET', 'INSTALLED', 'COMPLETED')
+GROUP BY
+    etapa
+ORDER BY
+    valor DESC;
